@@ -7,6 +7,7 @@ namespace crm_backend.Services
     public interface ICustomerService
     {
         List<Customer> GetAll();
+        Pagination<Customer> GetAllPagination(int pageNumber, int pageSize, DateTime? startDate, DateTime? endDate);
         Customer GetById(int id);
         Customer Create(CreateRequest customer);
         Customer Update(int id, UpdateRequest customer);

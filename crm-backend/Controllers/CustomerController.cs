@@ -23,10 +23,17 @@ namespace crm_backend.Controllers
             _httpError = new HandleHttpError();
         }
 
-        [HttpGet]
+        [HttpGet("all")]
         public IActionResult GetAll()
         {
             var customers = _customerService.GetAll();
+            return Ok(customers);
+        }
+
+        [HttpGet]
+        public IActionResult GetAllPagination(DateTime? startDate, DateTime? endDate, int pageNumber = 1, int pageSize = 8)
+        {
+            var customers = _customerService.GetAllPagination(pageNumber, pageSize, startDate, endDate);
             return Ok(customers);
         }
 
