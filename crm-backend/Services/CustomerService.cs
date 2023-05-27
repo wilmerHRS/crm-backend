@@ -2,6 +2,7 @@
 using crm_backend.Data;
 using crm_backend.Entities;
 using crm_backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace crm_backend.Services
 {
@@ -19,15 +20,34 @@ namespace crm_backend.Services
         // Obtener TODOS (GET)
         public List<Customer> GetAll()
         {
-            List<Customer> customers = _context.Customers.Where(c => c.IsDeleted == false).ToList();
+            List<Customer> customers = _context.Customers.Where(c => c.IsDeleted == false).OrderByDescending(c => c.UpdatedAt).ToList();
             return customers;
         }
 
         // Obtener con Paginación (GET)
-        public Pagination<Customer> GetAllPagination(int pageNumber, int pageSize, DateTime? startDate, DateTime? endDate)
+        public Pagination<Customer> GetAllPagination(int pageNumber, int pageSize, string searchName, DateTime? startDate, DateTime? endDate)
         {
+            // Obtén los datos totales basados en el rango de fechas
+            var query = _context.Customers.AsQueryable();
+            query = query.Where(c => c.IsDeleted == false);
+
+            if (startDate.HasValue)
+            {
+                query = query.Where(c => c.CreatedAt.AddHours(-5) >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                query = query.Where(c => c.CreatedAt.AddHours(-5) <= endDate.Value.AddDays(1));
+            }
+
+            if (!string.IsNullOrEmpty(searchName))
+            {
+                query = query.Where(c => c.Nombre.Contains(searchName));
+            }
+
             // Total de clientes
-            var totalCustomers = _context.Customers.Where(c => c.IsDeleted == false).Count();
+            var totalCustomers = query.Count();
 
 
             // Total de páginas
@@ -40,11 +60,16 @@ namespace crm_backend.Services
             var startIndex = (pageNumber - 1) * pageSize;
             var endIndex = Math.Min(startIndex + pageSize, totalCustomers);
 
-            List<Customer> customers = _context.Customers.Where(c => c.IsDeleted == false && (!startDate.HasValue || c.CreatedAt >= startDate.Value) &&
-                    (!endDate.HasValue || c.CreatedAt <= endDate.Value))
-                .Skip(startIndex)
-                .Take(pageSize)
-                .ToList();
+            List<Customer> customers = new List<Customer>();
+
+            if (totalCustomers > 0)
+            {
+                customers = query
+                    .OrderByDescending(c => c.UpdatedAt)
+                    .Skip(startIndex)
+                    .Take(pageSize)
+                    .ToList();
+            }
 
             var paginationData = new Pagination<Customer>
             {

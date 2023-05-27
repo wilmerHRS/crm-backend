@@ -31,9 +31,9 @@ namespace crm_backend.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllPagination(DateTime? startDate, DateTime? endDate, int pageNumber = 1, int pageSize = 8)
+        public IActionResult GetAllPagination(DateTime? startDate, DateTime? endDate, string? search, int pageNumber = 1, int pageSize = 8)
         {
-            var customers = _customerService.GetAllPagination(pageNumber, pageSize, startDate, endDate);
+            var customers = _customerService.GetAllPagination(pageNumber, pageSize, search, startDate, endDate);
             return Ok(customers);
         }
 
