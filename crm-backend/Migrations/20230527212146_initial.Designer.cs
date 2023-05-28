@@ -12,7 +12,7 @@ using crm_backend.Data;
 namespace crm_backend.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230526042710_initial")]
+    [Migration("20230527212146_initial")]
     partial class initial
     {
         /// <inheritdoc />
